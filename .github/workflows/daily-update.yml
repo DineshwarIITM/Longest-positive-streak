@@ -1,0 +1,39 @@
+name: Daily Repository Update
+
+on:
+  schedule:
+    # Runs at 9:30 AM UTC daily (3:00 PM IST)
+    - cron: "30 9 * * *"
+  workflow_dispatch: # Allows manual testing
+
+jobs:
+  daily-commit:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write  # Required to push commits
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Daily update for 24f2004781@ds.study.iitm.ac.in
+        run: |
+          echo "Processing daily update for 24f2004781@ds.study.iitm.ac.in"
+          echo "Timestamp: $(date -u '+%Y-%m-%d %H:%M:%S UTC')"
+
+      - name: Create daily log file
+        run: |
+          mkdir -p daily-logs
+          echo "DevSync Daily Update Report" > daily-logs/update-$(date -u '+%Y%m%d').txt
+          echo "=========================" >> daily-logs/update-$(date -u '+%Y%m%d').txt
+          echo "Update Time: $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> daily-logs/update-$(date -u '+%Y%m%d').txt
+          echo "Workflow Run: ${{ github.run_number }}" >> daily-logs/update-$(date -u '+%Y%m%d').txt
+          echo "Repository: ${{ github.repository }}" >> daily-logs/update-$(date -u '+%Y%m%d').txt
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add daily-logs/
+          git commit -m "Daily update: $(date -u '+%Y-%m-%d %H:%M:%S UTC') [skip ci]" || exit 0
+          git push
